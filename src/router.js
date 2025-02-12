@@ -14,21 +14,21 @@ const {
 
 // Public routes
 // Auth
-router.post("/api/register", hashPassword, register);
-router.post("/api/login", getUserByEmailMiddleWare, verifyPassword);
+router.post("/register", hashPassword, register);
+router.post("/login", getUserByEmailMiddleWare, verifyPassword);
 
 // Private routes
 const usersControllers = require("./controllers/usersControllers");
 
-router.get("/api/profile", verifyToken, usersControllers.getMyProfile);
+router.get("/profile", verifyToken, usersControllers.getMyProfile);
 
 // Articles routes
 const articlesControllers = require("./controllers/articlesControllers");
 
-router.get("/api/articles", articlesControllers.browse);
-router.get("/api/articles/:id", articlesControllers.read);
-router.put("/api/articles/:id", articlesControllers.edit);
-router.post("/api/articles", articlesControllers.add);
-router.delete("/api/articles/:id", articlesControllers.destroy);
+router.get("/articles", articlesControllers.browse);
+router.get("/articles/:id", articlesControllers.read);
+router.put("/articles/:id", articlesControllers.edit);
+router.post("/articles", articlesControllers.add);
+router.delete("/articles/:id", articlesControllers.destroy);
 
 module.exports = router;
