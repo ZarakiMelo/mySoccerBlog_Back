@@ -8,7 +8,7 @@ Ce dépôt est une structure simple en MVC avec Express, créée à partir de z�
 
 1. Clonez le dépôt depuis Github.
 2. Exécutez `npm install`.
-3. Créez un fichier `.env` à partir du fichier `.env.sample` et ajoutez vos paramètres de base de données. Ne supprimez pas le fichier `.sample`, il doit être conservé.
+3. Créez un fichier `.env` à partir du fichier `.env.sample` et ajoutez vos paramètres de base de données. Ne supprimez pas le fichier `.env.sample`, il doit être conservé.
 
    ```ini
    DB_HOST=your_db_host
@@ -17,13 +17,14 @@ Ce dépôt est une structure simple en MVC avec Express, créée à partir de z�
    DB_NAME=your_db_name
 
    # JWT options
-   # Generate a secret JWT key
+   # Create a secret JWT decryption key.
+   # ex : JggP476!pKIJgF3
    JWT_SECRET =
    # Expiration timing 1h, 50s, 10m, u choose
    JWT_TIMING = 10m
    ```
 
-4. Adaptez `database.sql` avec vos propres tables. Importez le script dans votre serveur SQL. Vous pouvez le faire manuellement ou exécuter le script _migrate_ :
+4. Adaptez au besoin `database.sql` avec vos propres tables. Importez le script dans votre serveur SQL. Vous pouvez le faire manuellement ou exécuter le script _migrate_ :
 
    ```sh
    npm run migrate
@@ -50,20 +51,20 @@ git config --global core.autocrlf true
 
 ## Exemple
 
-Un exemple (une liste basique d'éléments) est fourni (vous pouvez charger le fichier `database.sql` dans une base de données de test). Les URLs accessibles sont :
+Une liste basique d'articles et de catégorie est fourni (vous pouvez charger le fichier `database.sql` dans une base de données de test). Les URLs accessibles sont :
 
 - **Page d'accueil** : [`GET localhost:5000/`](http://localhost:5000/)
-- **Parcourir les éléments** : [`GET localhost:5000/articles`](http://localhost:5000/articles)
-- **Lire un élément** : [`GET localhost:5000/articles/:id`](http://localhost:5000/articles/2)
-- **Modifier un élément** :
+- **Parcourir les articles** : [`GET localhost:5000/articles`](http://localhost:5000/articles)
+- **Lire un article** : [`GET localhost:5000/articles/:id`](http://localhost:5000/articles/2)
+- **Modifier un article** :
   ```http
   PUT localhost:5000/articles/:id
   ```
-- **Ajouter un élément** :
+- **Ajouter un article** :
   ```http
   POST localhost:5000/articles
   ```
-- **Supprimer un élément** :
+- **Supprimer un article** :
   ```http
   DELETE localhost:5000/articles/:id
   ```
