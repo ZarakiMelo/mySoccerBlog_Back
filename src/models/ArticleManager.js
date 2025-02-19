@@ -24,8 +24,8 @@ class ArticleManager extends AbstractManager {
 
   insert(article) {
     return this.connection.query(
-      `INSERT INTO ${this.table} (title, content, id_user, id_category) VALUES (?, ?, ?, ?)`,
-      [article.title, article.content, article.id_user, article.id_category]
+      `INSERT INTO ${this.table} (title, content, user_id, category_id) VALUES (?, ?, ?, ?)`,
+      [article.title, article.content, article.user_id, article.category_id]
     );
   }
 

@@ -52,6 +52,8 @@ const edit = (req, res) => {
 
 const add = (req, res) => {
   const article = req.body;
+  console.log(article);
+  article.user_id = req.payloads.sub;
 
   // TODO validations (length, format...)
 

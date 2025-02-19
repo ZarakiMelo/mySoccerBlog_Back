@@ -14,8 +14,8 @@ const {
 
 // Public routes
 // Auth
-router.post("/register", hashPassword, register);
-router.post("/login", getUserByEmailMiddleWare, verifyPassword);
+router.post("/auth/register", hashPassword, register);
+router.post("/auth/login", getUserByEmailMiddleWare, verifyPassword);
 
 // Private routes
 const usersControllers = require("./controllers/usersControllers");
@@ -27,8 +27,14 @@ const articlesControllers = require("./controllers/articlesControllers");
 
 router.get("/articles", articlesControllers.browse);
 router.get("/articles/:id", articlesControllers.read);
-router.put("/articles/:id", articlesControllers.edit);
-router.post("/articles", articlesControllers.add);
-router.delete("/articles/:id", articlesControllers.destroy);
+router.post("/articles", verifyToken, articlesControllers.add);
+router.put("/articles/:id", verifyToken, articlesControllers.edit);
+router.delete("/articles/:id", verifyToken, articlesControllers.destroy);
+
+// Categories routes
+const categoriesControllers = require("./controllers/categoriesControllers");
+
+router.get("/categories", categoriesControllers.browse);
+router.get("/categories/:id", categoriesControllers.read);
 
 module.exports = router;
