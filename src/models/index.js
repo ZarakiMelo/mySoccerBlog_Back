@@ -1,54 +1,102 @@
-const fs = require("fs");
-const mysql = require("mysql2/promise");
-const path = require("path");
+const { Sequelize, DataTypes } = require("sequelize");
 
-const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
-
-const pool = mysql.createPool({
-  host: DB_HOST,
-  port: DB_PORT,
-  user: DB_USER,
-  password: DB_PASSWORD,
-  database: DB_NAME,
+// Initialiser Sequelize avec SQLite
+const sequelize = new Sequelize({
+  dialect: "sqlite",
+  storage: "./database.sqlite", // Le fichier de base de données sera créé ici
+  logging: false // Désactive les logs SQL
 });
 
-pool.getConnection().catch(() => {
-  console.warn(
-    "Warning:",
-    "Failed to get a DB connection.",
-    "Did you create a .env file with valid credentials?",
-    "Routes using models won't work as intended"
-  );
-});
-
-const models = fs
-  .readdirSync(__dirname)
-  .filter((file) => file !== "AbstractManager.js" && file !== "index.js")
-  .reduce((acc, file) => {
-    // eslint-disable-next-line global-require, import/no-dynamic-require
-    const Manager = require(path.join(__dirname, file));
-
-    const managerInstance = new Manager();
-    managerInstance.setConnection(pool);
-
-    return { ...acc, [managerInstance.table]: managerInstance };
-  }, {});
-
-const handler = {
-  get(obj, prop) {
-    if (prop in obj) {
-      return obj[prop];
-    }
-
-    const pascalize = (string) =>
-      string.slice(0, 1).toUpperCase() + string.slice(1);
-
-    throw new ReferenceError(
-      `models.${prop} is not defined. Did you create ${pascalize(
-        prop
-      )}Manager.js?`
-    );
+// Définir les modèles
+const User = sequelize.define("User", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false
+  },
+  hashedPassword: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  firstname: DataTypes.STRING,
+  lastname: DataTypes.STRING
+});
+
+const Article = sequelize.define("Article", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  content: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  }
+});
+
+const Category = sequelize.define("Category", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  }
+});
+
+// Définir les relations
+User.hasMany(Article);
+Article.belongsTo(User);
+
+Category.hasMany(Article);
+Article.belongsTo(Category);
+
+// Synchroniser les modèles avec la base de données
+const migrate = async () => {
+  try {
+    await sequelize.sync({ force: true }); // force: true va supprimer et recréer les tables
+
+    // Créer des données de test
+    const testUser = await User.create({
+      email: "test@example.com",
+      hashedPassword: "$argon2id$v=19$m=65536,t=5,p=1$6F4DFQiZB6NPqGvlQT9YrA$dU/gpZMY6q9BNXYNZHHAphwZi6EEuVJ8um5E6mZKwLQ", // mot de passe: "password123"
+      firstname: "John",
+      lastname: "Doe"
+    });
+
+    const testCategory = await Category.create({
+      name: "Technology"
+    });
+
+    await Article.create({
+      title: "Premier article",
+      content: "Contenu du premier article",
+      UserId: testUser.id,
+      CategoryId: testCategory.id
+    });
+
+    console.log("Database synchronized and test data created");
+  } catch (error) {
+    console.error("Error synchronizing database:", error);
+    throw error;
+  }
 };
 
-module.exports = new Proxy(models, handler);
+module.exports = {
+  sequelize,
+  User,
+  Article,
+  Category,
+  migrate
+};

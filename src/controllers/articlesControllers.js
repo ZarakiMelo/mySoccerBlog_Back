@@ -1,87 +1,76 @@
-const models = require("../models");
+const { Article, User } = require("../models");
 
-const browse = (req, res) => {
-  models.article
-    .findAll()
-    .then(([articles]) => {
-      res.send(articles);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.sendStatus(500);
+const browse = async (req, res) => {
+  try {
+    const articles = await Article.findAll({
+      include: [User]
     });
+    res.json(articles);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 };
 
-const read = (req, res) => {
-  models.article
-    .find(req.params.id)
-    .then(([articles]) => {
-      if (articles[0] == null) {
-        res.sendStatus(404);
-      } else {
-        res.send(articles[0]);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.sendStatus(500);
+const read = async (req, res) => {
+  try {
+    const article = await Article.findByPk(req.params.id, {
+      include: [User]
     });
+    if (!article) {
+      res.sendStatus(404);
+    } else {
+      res.json(article);
+    }
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 };
 
-const edit = (req, res) => {
-  const article = req.body;
-
-  // TODO validations (length, format...)
-
-  article.id = parseInt(req.params.id, 10);
-
-  models.article
-    .update(article)
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.sendStatus(404);
-      } else {
-        res.sendStatus(204);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.sendStatus(500);
+const edit = async (req, res) => {
+  try {
+    const [updated] = await Article.update(req.body, {
+      where: { id: req.params.id }
     });
+    if (!updated) {
+      res.sendStatus(404);
+    } else {
+      res.sendStatus(204);
+    }
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 };
 
-const add = (req, res) => {
-  const article = req.body;
-  console.log(article);
-  article.user_id = req.payloads.sub;
-
-  // TODO validations (length, format...)
-
-  models.article
-    .insert(article)
-    .then(([result]) => {
-      res.location(`/articles/${result.insertId}`).sendStatus(201);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.sendStatus(500);
+const add = async (req, res) => {
+  try {
+    const article = await Article.create({
+      ...req.body,
+      UserId: req.payloads.sub
     });
+    res.status(201).json(article);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 };
 
-const destroy = (req, res) => {
-  models.article
-    .delete(req.params.id)
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.sendStatus(404);
-      } else {
-        res.sendStatus(204);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.sendStatus(500);
+const destroy = async (req, res) => {
+  try {
+    const deleted = await Article.destroy({
+      where: { id: req.params.id }
     });
+    if (!deleted) {
+      res.sendStatus(404);
+    } else {
+      res.sendStatus(204);
+    }
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 };
 
 module.exports = {

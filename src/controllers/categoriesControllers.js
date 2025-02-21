@@ -1,31 +1,27 @@
-const models = require("../models");
+const { Category } = require("../models");
 
-const browse = (req, res) => {
-  models.category
-    .findAll()
-    .then(([categories]) => {
-      res.send(categories);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.sendStatus(500);
-    });
+const browse = async (req, res) => {
+  try {
+    const categories = await Category.findAll();
+    res.json(categories);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 };
 
-const read = (req, res) => {
-  models.category
-    .find(req.params.id)
-    .then(([categories]) => {
-      if (categories[0] == null) {
-        res.sendStatus(404);
-      } else {
-        res.send(categories[0]);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.sendStatus(500);
-    });
+const read = async (req, res) => {
+  try {
+    const category = await Category.findByPk(req.params.id);
+    if (!category) {
+      res.sendStatus(404);
+    } else {
+      res.json(category);
+    }
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 };
 
 module.exports = {
